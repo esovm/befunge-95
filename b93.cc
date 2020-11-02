@@ -84,7 +84,7 @@ int main(int argc, char **argv)
             }
 
             i += 1;
-            if(i + 1>= argc)
+            if(i + 1 >= argc)
             {
                 std::fprintf(stderr, "Error: exptected a file\n");
                 return EXIT_FAILURE;
@@ -134,15 +134,15 @@ int main(int argc, char **argv)
 
                 case '-':
                 {
-                    std::int32_t a = pop();
-                    std::int32_t b = pop();
+                    std::int32_t const a = pop();
+                    std::int32_t const b = pop();
                     push(b - a);
                 } break;
 
                 case '/':
                 {
-                    std::int32_t a = pop();
-                    std::int32_t b = pop();
+                    std::int32_t const a = pop();
+                    std::int32_t const b = pop();
                     push(b / a);
                 } break;
 
@@ -153,8 +153,8 @@ int main(int argc, char **argv)
 
                 case '%':
                 {
-                    std::int32_t a = pop();
-                    std::int32_t b = pop();
+                    std::int32_t const a = pop();
+                    std::int32_t const b = pop();
                     push(b % a);
                 } break;
 
@@ -208,14 +208,14 @@ int main(int argc, char **argv)
 
                 case '_':
                 {
-                    bool value = pop() != 0;
+                    bool const value = pop() != 0;
                     if (value) goto west;
                     else goto east;
                 } break;
 
                 case '|':
                 {
-                    bool value = pop() != 0;
+                    bool const value = pop() != 0;
                     if (value) goto north;
                     else goto south;
                 } break;
@@ -227,7 +227,7 @@ int main(int argc, char **argv)
                     /* while the current ch is not a quote push its ascii value */
                     for (;;)
                     {
-                        if (char ch = data[pos[1] * cols + pos[0]]; ch != '"')
+                        if (char const ch = data[pos[1] * cols + pos[0]]; ch != '"')
                         {
                             push(ch);
                             move();
