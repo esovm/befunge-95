@@ -4,12 +4,16 @@
 #include <array>
 #include <deque>
 #include <random>
+#include <iostream>
 
 namespace
 {
+    constexpr std::size_t max_row_size = 25;
+    constexpr std::size_t max_col_size = 80;
+    
     struct grid_t 
     { 
-        std::array<char, 80 * 25> data; 
+        std::array<char, max_row_size * max_col_size> data; 
         std::size_t rows = 1; 
         std::size_t cols = 0; 
     };
@@ -22,7 +26,7 @@ namespace
         /* open a file for reading */
         if(std::FILE * const file = std::fopen(filepath.data(), "r"); file != nullptr) 
         {
-            std::array<char, 83 * 25> data = {};
+            std::array<char, max_row_size * max_col_size> data = {};
 
             std::size_t bytes_read = std::fread(data.data(), 1, data.size(), file);
 
@@ -298,6 +302,8 @@ int main(int argc, char **argv)
 
                 case 'g':
                 {
+                    if (stack.size() < 2) break;
+
                     std::ptrdiff_t y = static_cast<std::ptrdiff_t>(pop());
                     std::ptrdiff_t x = static_cast<std::ptrdiff_t>(pop());
 
@@ -308,8 +314,8 @@ int main(int argc, char **argv)
 
                 case 'p':
                 {
-                    std::ptrdiff_t y = static_cast<std::ptrdiff_t>(pop());
-                    std::ptrdiff_t x = static_cast<std::ptrdiff_t>(pop());
+                    std::ptrdiff_t y = (static_cast<std::ptrdiff_t>(pop()) % max_row_size + max_row_size) % max_row_size;
+                    std::ptrdiff_t x = (static_cast<std::ptrdiff_t>(pop()) % max_col_size + max_col_size) % max_col_size;
                     std::int32_t value = pop();
 
                     data[y * cols + x] = value;
