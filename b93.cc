@@ -325,7 +325,7 @@ int main(int argc, char **argv)
                 } break;
 
                 /* exit the program */
-                case '@': return 0;
+                case '@': goto end_of_loop;
 
                 /* for a number push its numeric value onto the stack */
                 case '0':
@@ -376,5 +376,7 @@ int main(int argc, char **argv)
 
             move();
         }
+
+        end_of_loop:;
     }
 }
