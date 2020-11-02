@@ -24,10 +24,11 @@ namespace
         /* open a file for reading */
         if(std::FILE * const file = std::fopen(filepath.data(), "r"); file != nullptr) 
         {
+            /* read the file into a buffer */
             std::array<char, max_row_size * max_col_size> data = {};
+            std::size_t const bytes_read = std::fread(data.data(), 1, data.size(), file);
 
-            std::size_t bytes_read = std::fread(data.data(), 1, data.size(), file);
-
+            /* copy the buffer to the result */
             for(std::size_t i = 0, j = 0, cols = 0; i < bytes_read; ++i, ++j)
             {
                 /* skip charecters that are not a unicode code point */
@@ -83,6 +84,11 @@ int main(int argc, char **argv)
             }
 
             i += 1;
+            if(i + 1>= argc)
+            {
+                std::fprintf(stderr, "Error: exptected a file\n");
+                return EXIT_FAILURE;
+            }
         }
 
         auto[data, rows, cols] = readfile(argv[i + 1]);
