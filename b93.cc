@@ -2,9 +2,8 @@
 #include <cinttypes>
 #include <string_view>
 #include <array>
-#include <deque>
+#include <vector>
 #include <random>
-#include <iostream>
 
 namespace
 {
@@ -13,15 +12,14 @@ namespace
     
     struct grid_t 
     { 
-        std::array<char, max_row_size * max_col_size> data; 
-        std::size_t rows = 1; 
-        std::size_t cols = 0; 
+        std::array<char, max_row_size * (max_col_size + 1)> data; 
+        std::size_t rows = max_row_size; 
+        std::size_t cols = max_col_size + 1; 
     };
     
     grid_t readfile(std::string_view filepath)
     {
         grid_t result = {};
-        std::size_t cols = 0;
         
         /* open a file for reading */
         if(std::FILE * const file = std::fopen(filepath.data(), "r"); file != nullptr) 
@@ -29,15 +27,6 @@ namespace
             std::array<char, max_row_size * max_col_size> data = {};
 
             std::size_t bytes_read = std::fread(data.data(), 1, data.size(), file);
-
-            /* find the max column */
-            for(std::size_t i = 0; i < bytes_read; ++i)
-            {
-                /* skip charecters that are not a unicode code point */
-                if((reinterpret_cast<unsigned char*>(data.data())[i] & 0xC0u) == 0x80u) continue;
-                if(data[i] == '\n') cols = 0;
-                result.cols = std::max(result.cols, ++cols);
-            }
 
             for(std::size_t i = 0, j = 0, cols = 0; i < bytes_read; ++i, ++j)
             {
@@ -53,7 +42,6 @@ namespace
                 {
                     j += result.cols - cols - 1;
                     cols = 0;
-                    ++result.rows;
                     continue;
                 }
 
@@ -94,13 +82,13 @@ int main(int argc, char **argv)
                 return EXIT_FAILURE;
             }
 
-            continue;
+            i += 1;
         }
 
         auto[data, rows, cols] = readfile(argv[i + 1]);
 
         /* create a stack */
-        std::deque <std::int32_t> stack;
+        std::vector<std::int32_t> stack;
         auto push = [&](std::int32_t value) -> void { stack.push_back(value); };
         auto pop = [&]() -> std::int32_t
         {
@@ -130,7 +118,6 @@ int main(int argc, char **argv)
 
         for (;;)
         {
-
             /* see https://catseye.tc/view/Befunge-93/doc/Befunge-93.markdown for what every instruction means */
             switch (char ins = data[pos[1] * cols + pos[0]])
             {
@@ -284,9 +271,7 @@ int main(int argc, char **argv)
                 case '.':
                 {
                     std::int32_t value = pop();
-                    std::printf("%"
-                    PRId32
-                    " ", value);
+                    std::printf("%" PRId32 " ", value);
                 } break;
 
                 case ',':
@@ -302,30 +287,33 @@ int main(int argc, char **argv)
 
                 case 'g':
                 {
-                    if (stack.size() < 2) break;
 
                     std::ptrdiff_t y = static_cast<std::ptrdiff_t>(pop());
                     std::ptrdiff_t x = static_cast<std::ptrdiff_t>(pop());
 
-                    push(x >= 0 && x < static_cast<std::ptrdiff_t>(cols) &&
-                         y >= 0 && y < static_cast<std::ptrdiff_t>(rows)
+                    push(x >= 0 && x < static_cast<std::ptrdiff_t>(max_col_size) &&
+                         y >= 0 && y < static_cast<std::ptrdiff_t>(max_row_size)
                          ? data[y * cols + x] : 0);
                 } break;
 
                 case 'p':
                 {
-                    std::ptrdiff_t y = (static_cast<std::ptrdiff_t>(pop()) % max_row_size + max_row_size) % max_row_size;
-                    std::ptrdiff_t x = (static_cast<std::ptrdiff_t>(pop()) % max_col_size + max_col_size) % max_col_size;
+                    std::ptrdiff_t y = (static_cast<std::ptrdiff_t>(pop()));
+                    std::ptrdiff_t x = (static_cast<std::ptrdiff_t>(pop()));
                     std::int32_t value = pop();
 
-                    data[y * cols + x] = value;
+                    /* check for out of bounds */
+                    if(x >= 0 && x < static_cast<std::ptrdiff_t>(max_col_size) &&
+                       y >= 0 && y < static_cast<std::ptrdiff_t>(max_row_size))
+                    {
+                        data[y * cols + x] = value;
+                    }
                 } break;
 
                 case '&':
                 {
                     std::int32_t value;
-                    std::scanf("%"
-                    SCNi32, &value);
+                    std::scanf("%" SCNi32, &value);
                     push(value);
                 } break;
 
